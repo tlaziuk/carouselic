@@ -1,0 +1,49 @@
+{
+  "name": "carouselic",
+  "version": "0.0.1",
+  "description": "TypeScript carousel",
+  "main": "src/index",
+  "typings": "src/index",
+  "files": [
+    "src/"
+  ],
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "build": "npm run tsc",
+    "clean": "git clean -Xf",
+    "coveralls": "remap-istanbul -i ./coverage/coverage.json -t lcovonly | coveralls",
+    "lint": "find . -name *.ts -print | grep -v .d.ts | grep -v node_modules | xargs tslint -t verbose",
+    "prepublish": "npm run clean && npm run build && npm run bundle",
+    "test": "istanbul cover _mocha --report lcovonly -- --reporter spec -- ./test/index.js",
+    "tsc": "tsc",
+    "tsc:w": "tsc -w",
+    "bundle": "webpack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tlaziuk/rangejs.git"
+  },
+  "keywords": [
+    "range",
+    "interval",
+    "typescript"
+  ],
+  "author": "Tomasz Łaziuk",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/tlaziuk/rangejs/issues"
+  },
+  "homepage": "https://github.com/tlaziuk/rangejs",
+  "dependencies": {},
+  "devDependencies": {
+    "chai": "^3.4.0",
+    "coveralls": "^2.11.9",
+    "istanbul": "^0.4.3",
+    "mocha": "^2.2.5",
+    "remap-istanbul": "^0.6.4",
+    "tslint": "^3.10.2",
+    "typescript": "next"
+  }
+}
