@@ -19,7 +19,8 @@
     "test": "istanbul cover _mocha --report lcovonly -- --reporter spec -- ./test/index.js",
     "tsc": "tsc",
     "tsc:w": "tsc -w",
-    "bundle": "webpack"
+    "bundle": "webpack",
+    "bundle:w": "webpack --watch"
   },
   "repository": {
     "type": "git",

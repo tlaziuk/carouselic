@@ -1,6 +1,10 @@
-export interface CarouselSize {
+export interface CarouselElementCooridinates {
     x: number
     y: number
+}
+export interface CarouselSize extends ClientRect {
+    center: CarouselElementCooridinates
+    absoluteCenter: CarouselElementCooridinates
 }
 export function element(el: any, parent: NodeSelector = document): Element {
     if (element instanceof Element) {
@@ -9,20 +13,27 @@ export function element(el: any, parent: NodeSelector = document): Element {
     if (typeof el === `string`) {
         return parent.querySelector(el)
     }
-    return el as never;
+    return undefined as never;
 }
 export abstract class CarouselElement {
     constructor(protected element: Element) { }
     public get size(): CarouselSize {
+        let size = this.element.getBoundingClientRect()
         return {
-            x: this.element.clientWidth,
-            y: this.element.clientHeight,
-        }
-    }
-    public get center(): CarouselSize {
-        return {
-            x: this.size.x / 2,
-            y: this.size.y / 2,
+            bottom: size.bottom,
+            top: size.top,
+            left: size.left,
+            right: size.right,
+            width: size.width,
+            height: size.height,
+            center: {
+                x: size.width / 2,
+                y: size.height / 2,
+            },
+            absoluteCenter: {
+                x: size.left + size.width / 2,
+                y: size.top + size.height / 2,
+            },
         }
     }
 }
