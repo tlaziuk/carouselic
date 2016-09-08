@@ -20,34 +20,27 @@ export class Carousel extends CarouselElement {
             this.child.push(new CarouselChild(childs.item(i)))
         }
         if (this.child.length) {
-            this.currentIndex = this.child.length / 2
+            this.currentIndex = 0
         }
         this.elNext = elFind(elNext, this.element)
         if (this.elNext) {
-            this.elNext.addEventListener('click', (ev: MouseEvent) => {
-                this.move({ step: 1 })
-            })
+            this.elNext.addEventListener('click', this.event<MouseEvent>((ev: MouseEvent) => this.move({ step: 1 })))
             this.elNext.classList.add('next')
         }
         this.elPrev = elFind(elPrev, this.element)
         if (this.elPrev) {
-            this.elPrev.addEventListener('click', (ev: MouseEvent) => {
-                this.move({ step: -1 })
-            })
+            this.elPrev.addEventListener('click', this.event<MouseEvent>((ev: MouseEvent) => this.move({ step: -1 })))
             this.elPrev.classList.add('prev')
         }
-        this.element.addEventListener('wheel', (ev: WheelEvent) => {
-            this.move({ step: ev.deltaX + ev.deltaY + ev.deltaZ < 0 ? -1 : 1 })
-        })
         if (window) {
-            window.addEventListener('resize', (ev: UIEvent) => {
-                if (window.requestAnimationFrame) {
-                    window.requestAnimationFrame(this.move)
-                } else {
-                    setTimeout(this.move, 0)
-                }
-            })
+            window.addEventListener('resize', this.event<UIEvent>((ev: UIEvent) => this.move()))
         }
+    }
+    protected event<T extends Event>(fn: (ev: T) => any): (this: this, ev: T) => any {
+        if (window.requestAnimationFrame) {
+            return (ev: T) => window.requestAnimationFrame(fn.bind(this, ev))
+        }
+        return (ev: T) => setTimeout(fn.bind(this, ev), 0)
     }
     public get current(): CarouselChild {
         return this._current
