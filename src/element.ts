@@ -16,9 +16,9 @@ export function element(el: any, parent: NodeSelector = document): Element {
     return undefined as never;
 }
 export abstract class CarouselElement {
-    constructor(protected element: Element) { }
-    public get size(): CarouselSize {
-        let size = this.element.getBoundingClientRect()
+    constructor(protected element: HTMLElement, protected childSelector: string = '.child') { }
+    public size(el = this.element): CarouselSize {
+        let size = el.getBoundingClientRect()
         return {
             bottom: size.bottom,
             top: size.top,

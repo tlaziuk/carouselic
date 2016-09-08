@@ -1,40 +1,32 @@
-import { CarouselElement, element as elFind, CarouselSize } from './element'
-import { CarouselChild } from './child'
+import { CarouselElement, element as find, CarouselSize } from './element'
+import { translate as transformTranslate } from './transform'
+export interface MoveInterface {
+    next: boolean
+    previous: boolean
+}
 export interface StepInterface {
     step?: number
 }
 export interface CarouselOpt {
-    elNext?: Element | string
-    elPrev?: Element | string
     childSelector?: string
 }
 export class Carousel extends CarouselElement {
-    protected child: CarouselChild[] = []
-    protected elNext: Element
-    protected elPrev: Element
-    protected _current: CarouselChild
-    constructor(element: Element, {elNext = '.next', elPrev = '.prev', childSelector = '.child'}: CarouselOpt = {}) {
-        super(element)
-        let childs = this.element.querySelectorAll(childSelector)
-        for (let i = 0; i < childs.length; i++) {
-            this.child.push(new CarouselChild(childs.item(i)))
-        }
+    constructor(element: HTMLElement, {childSelector = '.child'}: CarouselOpt = {}) {
+        super(element, childSelector)
         if (this.child.length) {
             this.currentIndex = 0
-        }
-        this.elNext = elFind(elNext, this.element)
-        if (this.elNext) {
-            this.elNext.addEventListener('click', this.event<MouseEvent>((ev: MouseEvent) => this.move({ step: 1 })))
-            this.elNext.classList.add('next')
-        }
-        this.elPrev = elFind(elPrev, this.element)
-        if (this.elPrev) {
-            this.elPrev.addEventListener('click', this.event<MouseEvent>((ev: MouseEvent) => this.move({ step: -1 })))
-            this.elPrev.classList.add('prev')
         }
         if (window) {
             window.addEventListener('resize', this.event<UIEvent>((ev: UIEvent) => this.move()))
         }
+    }
+    protected get child(): HTMLElement[] {
+        let childs = this.element.querySelectorAll(this.childSelector) as NodeListOf<HTMLElement>
+        let result = [] as HTMLElement[]
+        for (let i = 0; i < childs.length; i++) {
+            result.push(childs.item(i))
+        }
+        return result
     }
     protected event<T extends Event>(fn: (ev: T) => any): (this: this, ev: T) => any {
         if (window.requestAnimationFrame) {
@@ -42,38 +34,46 @@ export class Carousel extends CarouselElement {
         }
         return (ev: T) => setTimeout(fn.bind(this, ev), 0)
     }
-    public get current(): CarouselChild {
+    protected _current: HTMLElement
+    public get current(): HTMLElement {
         return this._current
     }
-    public set current(el: CarouselChild) {
+    public set current(el: HTMLElement) {
         this._current = el
-        if (this.size.width >= this.size.height) {
-            this._current.move({ x: 0, y: this._current.size.center.y, })
-            let left = this._current.size.center.x
-            for (let i = this.child.indexOf(this._current); i >= 0; i--) {
-                left -= this.child[i].size.center.x
-                this.child[i].move({ x: left, y: this.size.center.y - this.child[i].size.center.y })
-                left -= this.child[i].size.center.x
+        const currentSize = this.size(this._current)
+        const thisSize = this.size(this.element)
+        const child = this.child
+        if (thisSize.width >= thisSize.height) {
+            this._current.style.transform = transformTranslate({ x: 0, y: currentSize.center.y, })
+            let left = currentSize.center.x
+            for (let i = child.indexOf(this._current); i >= 0; i--) {
+                let childSize = this.size(child[i]);
+                left -= childSize.center.x
+                child[i].style.transform = transformTranslate({ x: left, y: thisSize.center.y - childSize.center.y, })
+                left -= childSize.center.x
             }
-            let right = -this._current.size.center.x
-            for (let i = this.child.indexOf(this._current); i < this.child.length; i++) {
-                right += this.child[i].size.center.x
-                this.child[i].move({ x: right, y: this.size.center.y - this.child[i].size.center.y })
-                right += this.child[i].size.center.x
+            let right = -currentSize.center.x
+            for (let i = child.indexOf(this._current); i < child.length; i++) {
+                let childSize = this.size(child[i]);
+                right += childSize.center.x
+                child[i].style.transform = transformTranslate({ x: right, y: thisSize.center.y - childSize.center.y, })
+                right += childSize.center.x
             }
         } else {
-            this._current.move({ x: this._current.size.center.x, y: 0, })
-            let up = this._current.size.center.y
-            for (let i = this.child.indexOf(this._current); i >= 0; i--) {
-                up -= this.child[i].size.center.y
-                this.child[i].move({ x: this.size.center.x - this.child[i].size.center.x, y: up })
-                up -= this.child[i].size.center.y
+            this._current.style.transform = transformTranslate({ x: currentSize.center.x, y: 0, })
+            let up = currentSize.center.y
+            for (let i = child.indexOf(this._current); i >= 0; i--) {
+                let childSize = this.size(child[i]);
+                up -= childSize.center.y
+                child[i].style.transform = transformTranslate({ x: thisSize.center.x - childSize.center.x, y: up, })
+                up -= childSize.center.y
             }
-            let down = -this._current.size.center.y
-            for (let i = this.child.indexOf(this._current); i < this.child.length; i++) {
-                down += this.child[i].size.center.y
-                this.child[i].move({ x: this.size.center.x - this.child[i].size.center.x, y: down })
-                down += this.child[i].size.center.y
+            let down = -currentSize.center.y
+            for (let i = child.indexOf(this._current); i < child.length; i++) {
+                let childSize = this.size(child[i]);
+                down += childSize.center.y
+                child[i].style.transform = transformTranslate({ x: thisSize.center.x - childSize.center.x, y: down, })
+                down += childSize.center.y
             }
         }
     }
@@ -92,8 +92,11 @@ export class Carousel extends CarouselElement {
     public get length(): number {
         return this.child.length
     }
-    public move({step = 0}: StepInterface = {}): this {
+    public move({step = 0}: StepInterface = {}): MoveInterface {
         this.currentIndex += step
-        return this
+        return {
+            next: this.currentIndex < (this.length - 1),
+            previous: this.currentIndex > 0,
+        }
     }
 }
