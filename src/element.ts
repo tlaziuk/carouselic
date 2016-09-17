@@ -1,10 +1,12 @@
 export interface CarouselElementCooridinates {
     x: number
     y: number
+    [key: string]: any
 }
 export interface CarouselSize extends ClientRect {
     center: CarouselElementCooridinates
     absoluteCenter: CarouselElementCooridinates
+    [key: string]: any
 }
 export function element(el: any, parent: NodeSelector = document): Element {
     if (element instanceof Element) {
@@ -13,7 +15,7 @@ export function element(el: any, parent: NodeSelector = document): Element {
     if (typeof el === `string`) {
         return parent.querySelector(el)
     }
-    return undefined as never;
+    return undefined as never
 }
 export abstract class CarouselElement {
     constructor(protected element: HTMLElement, protected childSelector: string = '.child') { }

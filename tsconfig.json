@@ -10,7 +10,7 @@
     "noEmitOnError": true,
     "noImplicitAny": true,
     "noImplicitReturns": true,
-    "preserveConstEnums": true,
+    "preserveConstEnums": false,
     "pretty": true,
     "removeComments": true,
     "target": "es5"

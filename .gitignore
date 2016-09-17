@@ -23,5 +23,7 @@ node_modules
 tags
 #project
 **.js
+!**.webpack.js
+!**.web.js
 **.d.ts
 **.map

@@ -1,23 +1,36 @@
 import { CarouselElement, element as find, CarouselSize } from './element'
-import { translate as transformTranslate } from './transform'
+import { translate as transformTranslate, TranslateInterface } from './transform'
+export enum Orientation {
+    Automatic,
+    Horiziontal,
+    Vertical,
+}
 export interface MoveInterface {
     next: boolean
     previous: boolean
 }
 export interface StepInterface {
     step?: number
+    orientation?: Orientation
+    async?: boolean
 }
 export interface CarouselOpt {
     childSelector?: string
+    orientation?: Orientation
+    currentClass?: string
 }
 export class Carousel extends CarouselElement {
-    constructor(element: HTMLElement, {childSelector = '.child'}: CarouselOpt = {}) {
+    protected orientation: Orientation
+    protected currentClass: string
+    constructor(element: HTMLElement, {childSelector = '.child', orientation = Orientation.Automatic, currentClass = 'current' }: CarouselOpt = {}) {
         super(element, childSelector)
+        this.orientation = orientation
+        this.currentClass = currentClass
         if (this.child.length) {
             this.currentIndex = 0
         }
         if (window) {
-            window.addEventListener('resize', this.event<UIEvent>((ev: UIEvent) => this.move()))
+            window.addEventListener('resize', (ev: UIEvent) => this.move())
         }
     }
     protected get child(): HTMLElement[] {
@@ -28,11 +41,17 @@ export class Carousel extends CarouselElement {
         }
         return result
     }
-    protected event<T extends Event>(fn: (ev: T) => any): (this: this, ev: T) => any {
-        if (window.requestAnimationFrame) {
-            return (ev: T) => window.requestAnimationFrame(fn.bind(this, ev))
+    protected each(fn: (el: HTMLElement) => void): this {
+        for (let i of this.child) {
+            fn(i)
         }
-        return (ev: T) => setTimeout(fn.bind(this, ev), 0)
+        return this
+    }
+    protected event(fn: (...args: any[]) => any): (...args: any[]) => any {
+        if (typeof requestAnimationFrame === `function`) {
+            return (...args: any[]) => requestAnimationFrame(fn.bind(this, ...args))
+        }
+        return (...args: any[]) => setTimeout(fn.bind(this, ...args), 0)
     }
     protected _current: HTMLElement
     public get current(): HTMLElement {
@@ -40,41 +59,78 @@ export class Carousel extends CarouselElement {
     }
     public set current(el: HTMLElement) {
         this._current = el
+        this.each((el: HTMLElement) => { el.classList.remove(this.currentClass) })
+        this._current.classList.add(this.currentClass)
         const currentSize = this.size(this._current)
+        const currentIndex = this.currentIndex
         const thisSize = this.size(this.element)
         const child = this.child
-        if (thisSize.width >= thisSize.height) {
-            this._current.style.transform = transformTranslate({ x: 0, y: currentSize.center.y, })
-            let left = currentSize.center.x
-            for (let i = child.indexOf(this._current); i >= 0; i--) {
-                let childSize = this.size(child[i]);
-                left -= childSize.center.x
-                child[i].style.transform = transformTranslate({ x: left, y: thisSize.center.y - childSize.center.y, })
-                left -= childSize.center.x
+        let orientation: Orientation = this.orientation
+        if (orientation === Orientation.Automatic) {
+            if (thisSize.width >= thisSize.height) {
+                orientation = Orientation.Horiziontal
+            } else {
+                orientation = Orientation.Vertical
             }
-            let right = -currentSize.center.x
-            for (let i = child.indexOf(this._current); i < child.length; i++) {
-                let childSize = this.size(child[i]);
-                right += childSize.center.x
-                child[i].style.transform = transformTranslate({ x: right, y: thisSize.center.y - childSize.center.y, })
-                right += childSize.center.x
+        }
+        let yParameter: 'x' | 'y'
+        let leftParameter: 'left' | 'top'
+        let rightParameter: 'right' | 'bottom'
+        let widthParameter: 'width' | 'height'
+        let fn: (before: number, after: number) => TranslateInterface
+        if (orientation === Orientation.Horiziontal) {
+            fn = (before: number, after: number) => {
+                return { x: before, y: after, }
+            }
+            yParameter = 'y'
+            leftParameter = 'left'
+            rightParameter = 'right'
+            widthParameter = 'width'
+        } else {
+            fn = (before: number, after: number) => {
+                return { x: after, y: before, }
+            }
+            yParameter = 'x'
+            leftParameter = 'top'
+            rightParameter = 'bottom'
+            widthParameter = 'height'
+        }
+        let left: number
+        let right: number
+        if (!this.inViewport(this._current, orientation, thisSize)) {
+            if (currentSize[rightParameter] >= thisSize[rightParameter]) {
+                left = thisSize[widthParameter] - currentSize[widthParameter]
+            } else {
+                left = 0
             }
         } else {
-            this._current.style.transform = transformTranslate({ x: currentSize.center.x, y: 0, })
-            let up = currentSize.center.y
-            for (let i = child.indexOf(this._current); i >= 0; i--) {
-                let childSize = this.size(child[i]);
-                up -= childSize.center.y
-                child[i].style.transform = transformTranslate({ x: thisSize.center.x - childSize.center.x, y: up, })
-                up -= childSize.center.y
+            if (currentIndex === 0) {
+                left = 0
+            } else {
+                left = currentSize[leftParameter] - thisSize[leftParameter]
             }
-            let down = -currentSize.center.y
-            for (let i = child.indexOf(this._current); i < child.length; i++) {
-                let childSize = this.size(child[i]);
-                down += childSize.center.y
-                child[i].style.transform = transformTranslate({ x: thisSize.center.x - childSize.center.x, y: down, })
-                down += childSize.center.y
-            }
+        }
+        right = left + currentSize[widthParameter]
+        this._current.style.transform = transformTranslate(fn(left, thisSize.center[yParameter] - currentSize.center[yParameter]))
+        for (let i = currentIndex - 1; i >= 0; i--) {
+            let childElement = child[i]
+            let childSize = this.size(childElement)
+            left -= childSize[widthParameter]
+            childElement.style.transform = transformTranslate(fn(left, thisSize.center[yParameter] - childSize.center[yParameter]))
+        }
+        for (let i = currentIndex + 1; i < child.length; i++) {
+            let childElement = child[i]
+            let childSize = this.size(childElement)
+            childElement.style.transform = transformTranslate(fn(right, thisSize.center[yParameter] - currentSize.center[yParameter]))
+            right += childSize[widthParameter]
+        }
+    }
+    protected inViewport(element: HTMLElement, orientation: Orientation = this.orientation, thisSize: CarouselSize = this.size(this.element)): boolean {
+        const elementSize = this.size(element)
+        if (orientation === Orientation.Horiziontal) {
+            return thisSize.left <= elementSize.left && elementSize.right <= thisSize.right
+        } else {
+            return thisSize.top <= elementSize.top && elementSize.bottom <= thisSize.bottom
         }
     }
     public get currentIndex(): number {
@@ -92,8 +148,13 @@ export class Carousel extends CarouselElement {
     public get length(): number {
         return this.child.length
     }
-    public move({step = 0}: StepInterface = {}): MoveInterface {
-        this.currentIndex += step
+    public move({step = 0, orientation = this.orientation, async = true, }: StepInterface = {}): MoveInterface {
+        this.orientation = orientation
+        if (async) {
+            this.event(() => this.currentIndex += step)()
+        } else {
+            this.currentIndex += step
+        }
         return {
             next: this.currentIndex < (this.length - 1),
             previous: this.currentIndex > 0,
