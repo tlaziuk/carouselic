@@ -1,8 +1,7 @@
 language: node_js
 node_js:
-- '4'
-- '6'
 - '5'
+- '6'
 install:
 - npm install
 before_script:
@@ -20,4 +19,4 @@ deploy:
     secure: EvSQJs+tWXwiZi+j77khirasHFIcYlYhUYInA1iO7xbycVlSl4PmE/HwiH1C5BJRgcdM+MMnAQFfvBjL3kMapo+xPDDs+f8/gvpTe0DNHIRFuQMRUdUNE+LTXoJpJ4O7MT1yrYZO4PYwM3YmMcoKMmTqqL/v/LTYcNPo1ccH/fw/86ndWJyyMw2xAAwM4xm3RwWxfFSQFJyQIsGMG0z9qn8YS0i7g49A0nXEUqf2gPRRg45wzdZnVoqrtcp4lYZEeiRp8zvEMxr/aQuph5aYZgMY/DZ4RUC7i8PKyIa+UdprBtUWs03xfQ/maL+a5WbhS99k+jInqxMPRZOJSLiU7enGJ0s7h5NXaHCpVgzRx4xLK0htJ5ZLUtFyjX+mZQyy1vYcVgcW2SmcZewTvnSE0/MdsxN1dMXUhP2yMPjT151zdITEkB6NFq2/gBtEwXDByIx2/6l9N7H65nItU2yYVmHBBaKa2B3i9nx3IkSjHMYeXnib5emctByXHPJ5NjTWd9k+v9pxbFpKEXiJl7B22YJHtx8m/8DBlFgOXlr4x8hEXjw5WN8NRpsMieQ6nMNRB2RRehDVMI1gL2/BtYfnaujJuuWFFozgiY2XbP78Zo/MU/4nnTC22r9K3JJdPI4cdd4BnkonOWZkURzafsmDfW+n83dUwH170788EeKYGBI=
   on:
     tags: true
-    repo: tlaziuk/rangejs
+    repo: tlaziuk/carouselic
