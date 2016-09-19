@@ -1,1 +1,1 @@
-export { Carousel, Orientation } from './carousel'
+export { Carousel, Orientation, Mode } from './carousel'

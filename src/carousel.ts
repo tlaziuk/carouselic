@@ -5,19 +5,28 @@ export enum Orientation {
     Horiziontal,
     Vertical,
 }
+export enum Mode {
+    Single,
+    Multi,
+}
 export interface MoveInterface {
     next: boolean
     previous: boolean
 }
 export interface StepInterface {
-    step?: number
+    mode?: Mode
     orientation?: Orientation
-    async?: boolean
+    step?: number
 }
 export interface CarouselOpt {
     childSelector?: string
-    orientation?: Orientation
     currentClass?: string
+    orientation?: Orientation
+}
+export type CarouselVisible = [HTMLElement, number]
+export interface CarouselVisibleInterface {
+    first: CarouselVisible
+    last: CarouselVisible
 }
 export class Carousel extends CarouselElement {
     protected orientation: Orientation
@@ -59,13 +68,68 @@ export class Carousel extends CarouselElement {
     }
     public set current(el: HTMLElement) {
         this._current = el
-        this.each((el: HTMLElement) => { el.classList.remove(this.currentClass) })
-        this._current.classList.add(this.currentClass)
-        const currentSize = this.size(this._current)
-        const currentIndex = this.currentIndex
-        const thisSize = this.size(this.element)
-        const child = this.child
-        let orientation: Orientation = this.orientation
+        this.event(() => {
+            this.each((el: HTMLElement) => { el.classList.remove(this.currentClass) })
+            this._current.classList.add(this.currentClass)
+            const currentSize = this.size(this._current)
+            const currentIndex = this.currentIndex
+            const thisSize = this.size(this.element)
+            const child = this.child
+            let orientation: Orientation = this.parseOrientation(this.orientation, thisSize)
+            let yParameter: 'x' | 'y'
+            let leftParameter: 'left' | 'top'
+            let rightParameter: 'right' | 'bottom'
+            let widthParameter: 'width' | 'height'
+            let fn: (before: number, after: number) => TranslateInterface
+            if (orientation === Orientation.Horiziontal) {
+                fn = (before: number, after: number) => {
+                    return { x: before, y: after, }
+                }
+                yParameter = 'y'
+                leftParameter = 'left'
+                rightParameter = 'right'
+                widthParameter = 'width'
+            } else {
+                fn = (before: number, after: number) => {
+                    return { x: after, y: before, }
+                }
+                yParameter = 'x'
+                leftParameter = 'top'
+                rightParameter = 'bottom'
+                widthParameter = 'height'
+            }
+            let left: number
+            let right: number
+            if (!this.inViewport(this._current, orientation, thisSize)) {
+                if (currentSize[rightParameter] >= thisSize[rightParameter]) {
+                    left = thisSize[widthParameter] - currentSize[widthParameter]
+                } else {
+                    left = 0
+                }
+            } else {
+                if (currentIndex === 0) {
+                    left = 0
+                } else {
+                    left = currentSize[leftParameter] - thisSize[leftParameter]
+                }
+            }
+            right = left + currentSize[widthParameter]
+            this._current.style.transform = transformTranslate(fn(left, thisSize.center[yParameter] - currentSize.center[yParameter]))
+            for (let i = currentIndex - 1; i >= 0; i--) {
+                let childElement = child[i]
+                let childSize = this.size(childElement)
+                left -= childSize[widthParameter]
+                childElement.style.transform = transformTranslate(fn(left, thisSize.center[yParameter] - childSize.center[yParameter]))
+            }
+            for (let i = currentIndex + 1; i < child.length; i++) {
+                let childElement = child[i]
+                let childSize = this.size(childElement)
+                childElement.style.transform = transformTranslate(fn(right, thisSize.center[yParameter] - currentSize.center[yParameter]))
+                right += childSize[widthParameter]
+            }
+        })()
+    }
+    protected parseOrientation(orientation: Orientation, thisSize: CarouselSize): Orientation {
         if (orientation === Orientation.Automatic) {
             if (thisSize.width >= thisSize.height) {
                 orientation = Orientation.Horiziontal
@@ -73,60 +137,11 @@ export class Carousel extends CarouselElement {
                 orientation = Orientation.Vertical
             }
         }
-        let yParameter: 'x' | 'y'
-        let leftParameter: 'left' | 'top'
-        let rightParameter: 'right' | 'bottom'
-        let widthParameter: 'width' | 'height'
-        let fn: (before: number, after: number) => TranslateInterface
-        if (orientation === Orientation.Horiziontal) {
-            fn = (before: number, after: number) => {
-                return { x: before, y: after, }
-            }
-            yParameter = 'y'
-            leftParameter = 'left'
-            rightParameter = 'right'
-            widthParameter = 'width'
-        } else {
-            fn = (before: number, after: number) => {
-                return { x: after, y: before, }
-            }
-            yParameter = 'x'
-            leftParameter = 'top'
-            rightParameter = 'bottom'
-            widthParameter = 'height'
-        }
-        let left: number
-        let right: number
-        if (!this.inViewport(this._current, orientation, thisSize)) {
-            if (currentSize[rightParameter] >= thisSize[rightParameter]) {
-                left = thisSize[widthParameter] - currentSize[widthParameter]
-            } else {
-                left = 0
-            }
-        } else {
-            if (currentIndex === 0) {
-                left = 0
-            } else {
-                left = currentSize[leftParameter] - thisSize[leftParameter]
-            }
-        }
-        right = left + currentSize[widthParameter]
-        this._current.style.transform = transformTranslate(fn(left, thisSize.center[yParameter] - currentSize.center[yParameter]))
-        for (let i = currentIndex - 1; i >= 0; i--) {
-            let childElement = child[i]
-            let childSize = this.size(childElement)
-            left -= childSize[widthParameter]
-            childElement.style.transform = transformTranslate(fn(left, thisSize.center[yParameter] - childSize.center[yParameter]))
-        }
-        for (let i = currentIndex + 1; i < child.length; i++) {
-            let childElement = child[i]
-            let childSize = this.size(childElement)
-            childElement.style.transform = transformTranslate(fn(right, thisSize.center[yParameter] - currentSize.center[yParameter]))
-            right += childSize[widthParameter]
-        }
+        return orientation
     }
-    protected inViewport(element: HTMLElement, orientation: Orientation = this.orientation, thisSize: CarouselSize = this.size(this.element)): boolean {
+    protected inViewport(element: HTMLElement, orientation: Orientation, thisSize: CarouselSize): boolean {
         const elementSize = this.size(element)
+        orientation = this.parseOrientation(orientation, thisSize)
         if (orientation === Orientation.Horiziontal) {
             return thisSize.left <= elementSize.left && elementSize.right <= thisSize.right
         } else {
@@ -138,26 +153,63 @@ export class Carousel extends CarouselElement {
     }
     public set currentIndex(index: number) {
         index = Math.round(index)
+        let childs = this.child
         if (index < 0) {
             index = 0
-        } else if (index >= this.child.length) {
-            index = this.child.length - 1
+        } else if (index >= childs.length) {
+            index = childs.length - 1
         }
-        this.current = this.child[index]
+        this.current = childs[index]
     }
     public get length(): number {
         return this.child.length
     }
-    public move({step = 0, orientation = this.orientation, async = true, }: StepInterface = {}): MoveInterface {
+    protected getVisible(orientation: Orientation, thisSize: CarouselSize): CarouselVisibleInterface {
+        const childs = this.child
+        let result: CarouselVisibleInterface = {
+            first: [childs[childs.length - 1], childs.length - 1],
+            last: [childs[0], 0],
+        }
+        for (let child of childs) {
+            if (this.inViewport(child, orientation, thisSize)) {
+                let index = childs.indexOf(child)
+                if (index < result.first[1]) {
+                    result.first = [child, index]
+                }
+                if (index > result.last[1]) {
+                    result.last = [child, index]
+                }
+            }
+        }
+        return result
+    }
+    public move({step = 0, orientation = this.orientation, mode = Mode.Single, }: StepInterface = {}): MoveInterface {
         this.orientation = orientation
-        if (async) {
-            this.event(() => this.currentIndex += step)()
-        } else {
+        let result: MoveInterface = {
+            next: false,
+            previous: false,
+        }
+        if (mode === Mode.Single) {
             this.currentIndex += step
+            result.next = this.currentIndex < this.length - 1
+            result.previous = this.currentIndex > 0
+        } else {
+            let thisSize = this.size(this.element)
+            let visible = this.getVisible(this.parseOrientation(orientation, thisSize), thisSize)
+            let first = visible.first[1]
+            let last = visible.last[1]
+            if (step < 0) {
+                this.currentIndex = first + step
+                first = this.currentIndex
+            } else if (step > 0) {
+                this.currentIndex = last + step
+                last = this.currentIndex
+            } else {
+                this.currentIndex = this.currentIndex
+            }
+            result.next = first > 0
+            result.previous = last < this.length - 1
         }
-        return {
-            next: this.currentIndex < (this.length - 1),
-            previous: this.currentIndex > 0,
-        }
+        return result
     }
 }
