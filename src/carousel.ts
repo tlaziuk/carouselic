@@ -129,7 +129,7 @@ export class Carousel extends CarouselElement {
             }
         })()
     }
-    protected parseOrientation(orientation: Orientation, thisSize: CarouselSize): Orientation {
+    protected parseOrientation(orientation: Orientation = this.orientation, thisSize: CarouselSize = this.size(this.element)): Orientation {
         if (orientation === Orientation.Automatic) {
             if (thisSize.width >= thisSize.height) {
                 orientation = Orientation.Horiziontal
@@ -139,7 +139,7 @@ export class Carousel extends CarouselElement {
         }
         return orientation
     }
-    protected inViewport(element: HTMLElement, orientation: Orientation, thisSize: CarouselSize): boolean {
+    protected inViewport(element: HTMLElement, orientation: Orientation = this.orientation, thisSize: CarouselSize = this.size(this.element)): boolean {
         const elementSize = this.size(element)
         orientation = this.parseOrientation(orientation, thisSize)
         if (orientation === Orientation.Horiziontal) {
@@ -164,8 +164,9 @@ export class Carousel extends CarouselElement {
     public get length(): number {
         return this.child.length
     }
-    protected getVisible(orientation: Orientation, thisSize: CarouselSize): CarouselVisibleInterface {
+    protected getVisible(orientation: Orientation = this.orientation, thisSize: CarouselSize = this.size(this.element)): CarouselVisibleInterface {
         const childs = this.child
+        orientation = this.parseOrientation(orientation, thisSize)
         let result: CarouselVisibleInterface = {
             first: [childs[childs.length - 1], childs.length - 1],
             last: [childs[0], 0],
@@ -194,21 +195,22 @@ export class Carousel extends CarouselElement {
             result.next = this.currentIndex < this.length - 1
             result.previous = this.currentIndex > 0
         } else {
-            let thisSize = this.size(this.element)
-            let visible = this.getVisible(this.parseOrientation(orientation, thisSize), thisSize)
+            let visible = this.getVisible()
             let first = visible.first[1]
             let last = visible.last[1]
             if (step < 0) {
                 this.currentIndex = first + step
                 first = this.currentIndex
+                last += first - visible.first[1]
             } else if (step > 0) {
                 this.currentIndex = last + step
                 last = this.currentIndex
+                first += last - visible.last[1]
             } else {
                 this.currentIndex = this.currentIndex
             }
-            result.next = first > 0
-            result.previous = last < this.length - 1
+            result.previous = first > 0
+            result.next = last < this.length - 1
         }
         return result
     }
