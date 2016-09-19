@@ -25,5 +25,6 @@ tags
 **.js
 !**.webpack.js
 !**.web.js
+!**.config.js
 **.d.ts
 **.map
