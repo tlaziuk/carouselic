@@ -44,7 +44,9 @@
     "istanbul": "^0.4.3",
     "mocha": "^2.2.5",
     "remap-istanbul": "^0.6.4",
+    "ts-loader": "^0.8.2",
     "tslint": "^3.10.2",
-    "typescript": "next"
+    "typescript": "next",
+    "webpack": "^1.13.2"
   }
 }
