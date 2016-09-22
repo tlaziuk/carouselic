@@ -8,6 +8,7 @@ export enum Orientation {
 export enum Mode {
     Single,
     Multi,
+    Rotate,
 }
 export interface MoveInterface {
     next: boolean
@@ -190,27 +191,33 @@ export class Carousel extends CarouselElement {
             next: false,
             previous: false,
         }
-        if (mode === Mode.Single) {
-            this.currentIndex += step
-            result.next = this.currentIndex < this.length - 1
-            result.previous = this.currentIndex > 0
-        } else {
-            let visible = this.getVisible()
-            let first = visible.first[1]
-            let last = visible.last[1]
-            if (step < 0) {
-                this.currentIndex = first + step
-                first = this.currentIndex
-                last += first - visible.first[1]
-            } else if (step > 0) {
-                this.currentIndex = last + step
-                last = this.currentIndex
-                first += last - visible.last[1]
-            } else {
-                this.currentIndex = this.currentIndex
-            }
-            result.previous = first > 0
-            result.next = last < this.length - 1
+        let visible = this.getVisible()
+        let first = visible.first[1]
+        let last = visible.last[1]
+        switch (mode) {
+            case Mode.Rotate:
+                step = (last === first ? 1 : last - first + 1) * step
+            case Mode.Multi:
+                if (step < 0) {
+                    this.currentIndex = first + step
+                    first = this.currentIndex
+                    last += first - visible.first[1]
+                } else if (step > 0) {
+                    this.currentIndex = last + step
+                    last = this.currentIndex
+                    first += last - visible.last[1]
+                } else {
+                    this.currentIndex = this.currentIndex
+                }
+                result.previous = first > 0
+                result.next = last < this.length - 1
+                break
+            case Mode.Single:
+            default:
+                this.currentIndex += step
+                result.next = this.currentIndex < this.length - 1
+                result.previous = this.currentIndex > 0
+                break
         }
         return result
     }
