@@ -1,15 +1,8 @@
-import { CarouselElement, element as find, CarouselSize } from './element'
+import { element as find } from './element'
 import { translate as transformTranslate, TranslateInterface } from './transform'
-export enum Orientation {
-    Automatic,
-    Horiziontal,
-    Vertical,
-}
-export enum Mode {
-    Single,
-    Multi,
-    Rotate,
-}
+import { size, SizeInterface, SizeCooridinatesInterface } from './size'
+import { Orientation } from './orientation'
+import { Mode } from './mode'
 export interface MoveInterface {
     next: boolean
     previous: boolean
@@ -29,11 +22,12 @@ export interface CarouselVisibleInterface {
     first: CarouselVisible
     last: CarouselVisible
 }
-export class Carousel extends CarouselElement {
+export class Carousel {
     protected orientation: Orientation
     protected currentClass: string
-    constructor(element: HTMLElement, {childSelector = '.child', orientation = Orientation.Automatic, currentClass = 'current' }: CarouselOpt = {}) {
-        super(element, childSelector)
+    protected childSelector: string
+    constructor(protected element: HTMLElement, {childSelector = '.child', orientation = Orientation.Automatic, currentClass = 'current' }: CarouselOpt = {}) {
+        this.childSelector = childSelector
         this.orientation = orientation
         this.currentClass = currentClass
         if (this.child.length) {
@@ -72,9 +66,9 @@ export class Carousel extends CarouselElement {
         this.event(() => {
             this.each((el: HTMLElement) => { el.classList.remove(this.currentClass) })
             this._current.classList.add(this.currentClass)
-            const currentSize = this.size(this._current)
+            const currentSize = size(this._current)
             const currentIndex = this.currentIndex
-            const thisSize = this.size(this.element)
+            const thisSize = size(this.element)
             const child = this.child
             let orientation: Orientation = this.parseOrientation(this.orientation, thisSize)
             let yParameter: 'x' | 'y'
@@ -118,19 +112,19 @@ export class Carousel extends CarouselElement {
             this._current.style.transform = transformTranslate(fn(left, thisSize.center[yParameter] - currentSize.center[yParameter]))
             for (let i = currentIndex - 1; i >= 0; i--) {
                 let childElement = child[i]
-                let childSize = this.size(childElement)
+                let childSize = size(childElement)
                 left -= childSize[widthParameter]
                 childElement.style.transform = transformTranslate(fn(left, thisSize.center[yParameter] - childSize.center[yParameter]))
             }
             for (let i = currentIndex + 1; i < child.length; i++) {
                 let childElement = child[i]
-                let childSize = this.size(childElement)
+                let childSize = size(childElement)
                 childElement.style.transform = transformTranslate(fn(right, thisSize.center[yParameter] - currentSize.center[yParameter]))
                 right += childSize[widthParameter]
             }
         })()
     }
-    protected parseOrientation(orientation: Orientation = this.orientation, thisSize: CarouselSize = this.size(this.element)): Orientation {
+    protected parseOrientation(orientation: Orientation = this.orientation, thisSize: SizeInterface = size(this.element)): Orientation {
         if (orientation === Orientation.Automatic) {
             if (thisSize.width >= thisSize.height) {
                 orientation = Orientation.Horiziontal
@@ -140,8 +134,8 @@ export class Carousel extends CarouselElement {
         }
         return orientation
     }
-    protected inViewport(element: HTMLElement, orientation: Orientation = this.orientation, thisSize: CarouselSize = this.size(this.element)): boolean {
-        const elementSize = this.size(element)
+    protected inViewport(element: HTMLElement, orientation: Orientation = this.orientation, thisSize: SizeInterface = size(this.element)): boolean {
+        const elementSize = size(element)
         orientation = this.parseOrientation(orientation, thisSize)
         if (orientation === Orientation.Horiziontal) {
             return thisSize.left <= elementSize.left && elementSize.right <= thisSize.right
@@ -165,7 +159,7 @@ export class Carousel extends CarouselElement {
     public get length(): number {
         return this.child.length
     }
-    protected getVisible(orientation: Orientation = this.orientation, thisSize: CarouselSize = this.size(this.element)): CarouselVisibleInterface {
+    protected getVisible(orientation: Orientation = this.orientation, thisSize: SizeInterface = size(this.element)): CarouselVisibleInterface {
         const childs = this.child
         orientation = this.parseOrientation(orientation, thisSize)
         let result: CarouselVisibleInterface = {
