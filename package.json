@@ -1,6 +1,6 @@
 {
   "name": "carouselic",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "TypeScript carousel",
   "main": "src/index",
   "typings": "src/index",
@@ -27,16 +27,15 @@
     "url": "git+https://github.com/tlaziuk/rangejs.git"
   },
   "keywords": [
-    "range",
-    "interval",
+    "carousel",
     "typescript"
   ],
   "author": "Tomasz Łaziuk",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/tlaziuk/rangejs/issues"
+    "url": "https://github.com/tlaziuk/carouselic/issues"
   },
-  "homepage": "https://github.com/tlaziuk/rangejs",
+  "homepage": "https://github.com/tlaziuk/carouselic",
   "dependencies": {},
   "devDependencies": {
     "chai": "^3.4.0",
@@ -45,7 +44,7 @@
     "mocha": "^2.2.5",
     "remap-istanbul": "^0.6.4",
     "ts-loader": "^0.8.2",
-    "tslint": "^3.10.2",
+    "tslint": "next",
     "typescript": "next",
     "webpack": "^1.13.2"
   }

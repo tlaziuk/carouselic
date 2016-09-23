@@ -1,4 +1,4 @@
-export enum Mode {
+export const enum Mode {
     Single,
     Multi,
     Rotate,

@@ -1,4 +1,4 @@
-export enum Orientation {
+export const enum Orientation {
     Automatic,
     Horiziontal,
     Vertical,
