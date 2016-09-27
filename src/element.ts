@@ -1,5 +1,5 @@
 export function element(el: any, parent: NodeSelector = document): Element {
-    if (element instanceof Element) {
+    if (el instanceof Element) {
         return el
     }
     if (typeof el === `string`) {

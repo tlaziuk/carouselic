@@ -3,25 +3,31 @@ import { translate as transformTranslate, TranslateInterface } from './transform
 import { size, SizeInterface, SizeCooridinatesInterface } from './size'
 import { Orientation } from './orientation'
 import { Mode } from './mode'
+
 export interface MoveInterface {
     next: boolean
     previous: boolean
 }
+
 export interface StepInterface {
     mode?: Mode
     orientation?: Orientation
     step?: number
 }
+
 export interface CarouselOpt {
     childSelector?: string
     currentClass?: string
     orientation?: Orientation
 }
-export type CarouselVisible = [HTMLElement, number]
+
+export type CarouselVisibleTuple = [HTMLElement, number]
+
 export interface CarouselVisibleInterface {
-    first: CarouselVisible
-    last: CarouselVisible
+    first: CarouselVisibleTuple
+    last: CarouselVisibleTuple
 }
+
 export class Carousel {
     protected orientation: Orientation
     protected currentClass: string
