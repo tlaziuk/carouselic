@@ -1,7 +1,3 @@
-import { Carousel } from './carousel'
-export { Carousel }
+export { Carousel } from './carousel'
 export * from './orientation'
 export * from './mode'
-if (window) {
-    (window as any)['Carouselic'] = Carousel
-}

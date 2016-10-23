@@ -3,6 +3,9 @@ export interface TranslateInterface {
     y?: number
 }
 
-export function translate({x = 0, y = 0, }: TranslateInterface = {}) {
-    return `translate(${x}px,${y}px)`
+export function translate(el: HTMLElement, {x = 0, y = 0, }: TranslateInterface = {}): HTMLElement {
+    const transform = `translate(${x}px,${y}px)`
+    el.style.transform = transform
+    el.style.webkitTransform = transform
+    return el
 }

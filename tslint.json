@@ -5,7 +5,6 @@
     "comment-format": [true, "check-space", "check-lowercase"],
     "indent": [true, "spaces"],
     "no-duplicate-variable": true,
-    "no-duplicate-key": true,
     "no-eval": true,
     "no-internal-module": true,
     "no-trailing-whitespace": true,
