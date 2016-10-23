@@ -52,9 +52,9 @@ export class Carousel {
         }
         return result
     }
-    protected each(fn: (el: HTMLElement) => void): this {
+    protected each<T extends any>(fn: (this: T, el: HTMLElement) => void, thisVar?: T): this {
         for (let i of this.child()) {
-            fn(i)
+            fn.call(thisVar, i)
         }
         return this
     }
@@ -63,7 +63,9 @@ export class Carousel {
         return new Promise<HTMLElement>((resolve: (value?: HTMLElement | PromiseLike<HTMLElement>) => void, reject: (reason?: any) => void) => {
             this._current = el
             event<this>(() => {
-                this.each((el: HTMLElement) => { el.classList.remove(this.currentClass) })
+                this.each<this>((el: HTMLElement) => {
+                    el.classList.remove(this.currentClass)
+                }, this)
                 this._current.classList.add(this.currentClass)
                 const currentSize = size(this._current)
                 const child = this.child()
