@@ -1,8 +1,9 @@
-import { element as find } from './element'
-import { translate as transformTranslate, TranslateInterface } from './transform'
-import { size, SizeInterface, SizeCooridinatesInterface } from './size'
-import { Orientation } from './orientation'
 import { Mode } from './mode'
+import { Orientation } from './orientation'
+import { element as find } from './element'
+import { event } from './event'
+import { size, SizeInterface, SizeCooridinatesInterface } from './size'
+import { translate as transformTranslate, TranslateInterface } from './transform'
 
 export interface MoveInterface {
     next: boolean
@@ -57,21 +58,11 @@ export class Carousel {
         }
         return this
     }
-    protected event(fn: (...args: any[]) => any): (...args: any[]) => any {
-        if (typeof requestAnimationFrame === `function`) {
-            return (...args: any[]) => {
-                requestAnimationFrame(fn.bind(this, ...args))
-            }
-        }
-        return (...args: any[]) => {
-            setTimeout(fn.bind(this, ...args), 0)
-        }
-    }
     protected _current: HTMLElement
     public current(el: HTMLElement = this._current): Promise<HTMLElement> {
         return new Promise<HTMLElement>((resolve: (value?: HTMLElement | PromiseLike<HTMLElement>) => void, reject: (reason?: any) => void) => {
             this._current = el
-            this.event(() => {
+            event<this>(() => {
                 this.each((el: HTMLElement) => { el.classList.remove(this.currentClass) })
                 this._current.classList.add(this.currentClass)
                 const currentSize = size(this._current)
@@ -131,7 +122,7 @@ export class Carousel {
                     right += childSize[widthParameter]
                 }
                 resolve(el)
-            })()
+            }, this)()
         })
     }
     protected parseOrientation(orientation: Orientation = this.orientation, thisSize: SizeInterface = size(this.element)): Orientation {
