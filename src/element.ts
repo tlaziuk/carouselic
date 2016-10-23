@@ -3,7 +3,7 @@ export function element(el: any, parent: NodeSelector = document): Element {
         return el
     }
     if (typeof el === `string`) {
-        return parent.querySelector(el)
+        return parent.querySelector(el) as Element
     }
     return undefined as never
 }

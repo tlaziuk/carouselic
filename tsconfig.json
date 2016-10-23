@@ -9,8 +9,10 @@
     "module": "commonjs",
     "noEmitOnError": true,
     "noImplicitAny": true,
+    "noImplicitThis": true,
     "noImplicitReturns": true,
     "preserveConstEnums": false,
+    "strictNullChecks": true,
     "pretty": true,
     "removeComments": false,
     "target": "es6"
