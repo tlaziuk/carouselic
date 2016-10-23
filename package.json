@@ -1,9 +1,9 @@
 {
   "name": "carouselic",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "TypeScript carousel",
-  "main": "src/index",
-  "typings": "src/index",
+  "main": "src/index.js",
+  "typings": "src/index.d.ts",
   "files": [
     "src/",
     "dist/"
