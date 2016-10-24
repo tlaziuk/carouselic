@@ -42,7 +42,7 @@ export class Carousel {
         this.orientation = orientation
         this.currentClass = currentClass
         this.index = this.indexParse(index)
-        this.emit(CarouselEvent.INIT)
+        this.emit(CarouselEvent.init)
     }
     public child(): HTMLElement[] {
         let childs = this.element.querySelectorAll(this.childSelector) as NodeListOf<HTMLElement>
@@ -50,6 +50,7 @@ export class Carousel {
         for (let i = 0; i < childs.length; i++) {
             result.push(childs.item(i))
         }
+        this.emit(CarouselEvent.child, result)
         return result
     }
     protected _current: HTMLElement
@@ -116,6 +117,7 @@ export class Carousel {
                 transformTranslate(childElement, fn(right, thisSize.center[yParameter] - currentSize.center[yParameter]))
                 right += childSize[widthParameter]
             }
+            this.emit(CarouselEvent.current, el)
             return el
         }, this)
     }
@@ -175,6 +177,7 @@ export class Carousel {
                 }
             }
         }
+        this.emit(CarouselEvent.visible, result)
         return result
     }
     public move({step = 0, orientation = this.orientation, mode = Mode.Single, }: StepInterface = {}): MoveInterface {
@@ -211,6 +214,7 @@ export class Carousel {
                 result.previous = this.index > 0
                 break
         }
+        this.emit(CarouselEvent.move, result, step, orientation, mode)
         return result
     }
 }
