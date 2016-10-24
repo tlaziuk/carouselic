@@ -22,7 +22,6 @@ module.exports = (config: karma.Config) => {
         preprocessors: {
             '**/*.ts': [
                 `karma-typescript`,
-                `babel`,
             ],
         },
         reporters: [

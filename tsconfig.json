@@ -15,7 +15,14 @@
     "strictNullChecks": true,
     "pretty": true,
     "removeComments": false,
-    "target": "es6"
+    "target": "es5",
+    "lib": [
+      "dom",
+      "es5",
+      "es6",
+      "es2016",
+      "es2017"
+    ]
   },
   "include": [
     "**/*.conf.ts",
