@@ -1,3 +1,4 @@
+export * from './async'
 export * from './carousel'
 export * from './each'
 export * from './element'

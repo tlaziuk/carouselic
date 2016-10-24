@@ -2,7 +2,8 @@ import { Mode } from './mode'
 import { Orientation } from './orientation'
 import { each } from './each'
 import { element as find } from './element'
-import { event } from './event'
+import { on, emit, CarouselEvent } from './event'
+import { promiseFn } from './async'
 import { size, SizeInterface, SizeCooridinatesInterface } from './size'
 import { translate as transformTranslate, TranslateInterface } from './transform'
 
@@ -21,6 +22,7 @@ export interface CarouselOpt {
     childSelector?: string
     currentClass?: string
     orientation?: Orientation
+    index?: number
 }
 
 export type CarouselVisibleTuple = [HTMLElement, number]
@@ -31,21 +33,16 @@ export interface CarouselVisibleInterface {
 }
 
 export class Carousel {
+    protected emit = emit
     protected orientation: Orientation
     protected currentClass: string
     protected childSelector: string
-    constructor(protected element: HTMLElement, {childSelector = `:scope > *`, orientation = Orientation.Automatic, currentClass = `current` }: CarouselOpt = {}) {
+    constructor(protected element: HTMLElement, {childSelector = `:scope > *`, orientation = Orientation.Automatic, currentClass = `current`, index = 0, }: CarouselOpt = {}) {
         this.childSelector = childSelector
         this.orientation = orientation
         this.currentClass = currentClass
-        if (this.length) {
-            this.index = 0
-        }
-        if (window) {
-            window.addEventListener('resize', (ev: UIEvent) => {
-                this.move()
-            })
-        }
+        this.index = this.indexParse(index)
+        this.emit(CarouselEvent.INIT)
     }
     public child(): HTMLElement[] {
         let childs = this.element.querySelectorAll(this.childSelector) as NodeListOf<HTMLElement>
@@ -57,72 +54,70 @@ export class Carousel {
     }
     protected _current: HTMLElement
     public current(el: HTMLElement = this._current): Promise<HTMLElement> {
-        return new Promise<HTMLElement>((resolve: (value?: HTMLElement | PromiseLike<HTMLElement>) => void, reject: (reason?: any) => void) => {
-            this._current = el
-            event<this>(() => {
-                each<this, void, HTMLElement>(this.child(), (el: HTMLElement) => {
-                    el.classList.remove(this.currentClass)
-                }, this)
-                this._current.classList.add(this.currentClass)
-                const currentSize = size(this._current)
-                const child = this.child()
-                const index = this.index
-                const thisSize = size(this.element)
-                let orientation: Orientation = this.parseOrientation(this.orientation, thisSize)
-                let yParameter: 'x' | 'y'
-                let leftParameter: 'left' | 'top'
-                let rightParameter: 'right' | 'bottom'
-                let widthParameter: 'width' | 'height'
-                let fn: (before: number, after: number) => TranslateInterface
-                if (orientation === Orientation.Horiziontal) {
-                    fn = (before: number, after: number) => {
-                        return { x: before, y: after, }
-                    }
-                    yParameter = 'y'
-                    leftParameter = 'left'
-                    rightParameter = 'right'
-                    widthParameter = 'width'
+        this._current = el
+        return promiseFn<Carousel, HTMLElement>(function(this: Carousel) {
+            const child = this.child()
+            const currentSize = size(this._current)
+            const index = this.index
+            const thisSize = size(this.element)
+            each<Carousel, void, HTMLElement>(child, function(this: Carousel, el: HTMLElement) {
+                el.classList.remove(this.currentClass)
+            }, this)
+            this._current.classList.add(this.currentClass)
+            let orientation: Orientation = this.parseOrientation(this.orientation, thisSize)
+            let yParameter: 'x' | 'y'
+            let leftParameter: 'left' | 'top'
+            let rightParameter: 'right' | 'bottom'
+            let widthParameter: 'width' | 'height'
+            let fn: (before: number, after: number) => TranslateInterface
+            if (orientation === Orientation.Horiziontal) {
+                fn = (before: number, after: number) => {
+                    return { x: before, y: after, }
+                }
+                yParameter = 'y'
+                leftParameter = 'left'
+                rightParameter = 'right'
+                widthParameter = 'width'
+            } else {
+                fn = (before: number, after: number) => {
+                    return { x: after, y: before, }
+                }
+                yParameter = 'x'
+                leftParameter = 'top'
+                rightParameter = 'bottom'
+                widthParameter = 'height'
+            }
+            let left: number
+            let right: number
+            if (!this.inViewport(this._current, orientation, thisSize)) {
+                if (currentSize[rightParameter] >= thisSize[rightParameter]) {
+                    left = thisSize[widthParameter] - currentSize[widthParameter]
                 } else {
-                    fn = (before: number, after: number) => {
-                        return { x: after, y: before, }
-                    }
-                    yParameter = 'x'
-                    leftParameter = 'top'
-                    rightParameter = 'bottom'
-                    widthParameter = 'height'
+                    left = 0
                 }
-                let left: number
-                let right: number
-                if (!this.inViewport(this._current, orientation, thisSize)) {
-                    if (currentSize[rightParameter] >= thisSize[rightParameter]) {
-                        left = thisSize[widthParameter] - currentSize[widthParameter]
-                    } else {
-                        left = 0
-                    }
+            } else {
+                if (index === 0) {
+                    left = 0
                 } else {
-                    if (index === 0) {
-                        left = 0
-                    } else {
-                        left = currentSize[leftParameter] - thisSize[leftParameter]
-                    }
+                    left = currentSize[leftParameter] - thisSize[leftParameter]
                 }
-                right = left + currentSize[widthParameter]
-                transformTranslate(this._current, fn(left, thisSize.center[yParameter] - currentSize.center[yParameter]))
-                for (let i = index - 1; i >= 0; i--) {
-                    let childElement = child[i]
-                    let childSize = size(childElement)
-                    left -= childSize[widthParameter]
-                    transformTranslate(childElement, fn(left, thisSize.center[yParameter] - childSize.center[yParameter]))
-                }
-                for (let i = index + 1; i < child.length; i++) {
-                    let childElement = child[i]
-                    let childSize = size(childElement)
-                    transformTranslate(childElement, fn(right, thisSize.center[yParameter] - currentSize.center[yParameter]))
-                    right += childSize[widthParameter]
-                }
-                resolve(el)
-            }, this)()
-        })
+            }
+            right = left + currentSize[widthParameter]
+            transformTranslate(this._current, fn(left, thisSize.center[yParameter] - currentSize.center[yParameter]))
+            for (let i = index - 1; i >= 0; i--) {
+                let childElement = child[i]
+                let childSize = size(childElement)
+                left -= childSize[widthParameter]
+                transformTranslate(childElement, fn(left, thisSize.center[yParameter] - childSize.center[yParameter]))
+            }
+            for (let i = index + 1; i < child.length; i++) {
+                let childElement = child[i]
+                let childSize = size(childElement)
+                transformTranslate(childElement, fn(right, thisSize.center[yParameter] - currentSize.center[yParameter]))
+                right += childSize[widthParameter]
+            }
+            return el
+        }, this)
     }
     protected parseOrientation(orientation: Orientation = this.orientation, thisSize: SizeInterface = size(this.element)): Orientation {
         if (orientation === Orientation.Automatic) {

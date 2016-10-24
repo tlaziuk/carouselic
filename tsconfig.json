@@ -27,6 +27,7 @@
   "include": [
     "**/*.conf.ts",
     "**/*.config.ts",
+    "**/*.mod.ts",
     "**/*.web.ts",
     "**/*.webpack.ts",
     "src/index.ts"

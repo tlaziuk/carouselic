@@ -1,5 +1,4 @@
 import { Carousel } from './carousel'
+import './resize.mod'
+import './globalize.mod'
 export { Carousel }
-if (window) {
-    (window as any).Carouselic = Carousel
-}
