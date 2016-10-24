@@ -16,27 +16,27 @@ describe(`async`, () => {
         promiseFn(() => { }).then(() => { done() })
     })
     it(`expect ${promiseFn} to have working scoping`, (done: Function) => {
-        class testMock {
+        class TestMock {
             a = 1
         }
         promiseFn(function(this: testMock) {
             expect(this).not.toBeUndefined()
             expect(this.a).toEqual(1)
-        }, new testMock).then(() => { done() }, (err) => { done.fail(err) })
+        }, new TestMock).then(() => { done() }, (err) => { done.fail(err) })
     })
     it(`expect ${promiseFn} to have working arguments`, (done: Function) => {
-        class testMock {
+        class TestMock {
             static A = 2
-            static B = testMock.A ** testMock.A
-            a = testMock.A
-            b = testMock.B
+            static B = TestMock.A ** TestMock.A
+            a = TestMock.A
+            b = TestMock.B
         }
         promiseFn(function(this: testMock, val1: any, val2: any) {
             expect(this).not.toBeUndefined()
             expect(this.a).toEqual(val1)
             expect(this.b).toEqual(val2)
         },
-            new testMock,
-            testMock.A, testMock.B).then(() => { done() }, (err) => { done.fail(err) })
+            new TestMock,
+            TestMock.A, TestMock.B).then(() => { done() }, (err) => { done.fail(err) })
     })
 })
