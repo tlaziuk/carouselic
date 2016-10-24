@@ -1,5 +1,6 @@
 import { Mode } from './mode'
 import { Orientation } from './orientation'
+import { each } from './each'
 import { element as find } from './element'
 import { event } from './event'
 import { size, SizeInterface, SizeCooridinatesInterface } from './size'
@@ -54,18 +55,12 @@ export class Carousel {
         }
         return result
     }
-    protected each<T extends any>(fn: (this: T, el: HTMLElement) => any, thisVar?: T): this {
-        for (let i of this.child()) {
-            fn.call(thisVar, i)
-        }
-        return this
-    }
     protected _current: HTMLElement
     public current(el: HTMLElement = this._current): Promise<HTMLElement> {
         return new Promise<HTMLElement>((resolve: (value?: HTMLElement | PromiseLike<HTMLElement>) => void, reject: (reason?: any) => void) => {
             this._current = el
             event<this>(() => {
-                this.each<this>((el: HTMLElement) => {
+                each<this, void, HTMLElement>(this.child(), (el: HTMLElement) => {
                     el.classList.remove(this.currentClass)
                 }, this)
                 this._current.classList.add(this.currentClass)

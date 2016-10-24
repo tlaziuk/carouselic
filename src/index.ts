@@ -1,4 +1,5 @@
 export * from './carousel'
+export * from './each'
 export * from './element'
 export * from './event'
 export * from './mode'
