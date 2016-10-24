@@ -41,7 +41,9 @@ export class Carousel {
             this.index = 0
         }
         if (window) {
-            window.addEventListener('resize', (ev: UIEvent) => this.move())
+            window.addEventListener('resize', (ev: UIEvent) => {
+                this.move()
+            })
         }
     }
     public child(): HTMLElement[] {
@@ -52,7 +54,7 @@ export class Carousel {
         }
         return result
     }
-    protected each<T extends any>(fn: (this: T, el: HTMLElement) => void, thisVar?: T): this {
+    protected each<T extends any>(fn: (this: T, el: HTMLElement) => any, thisVar?: T): this {
         for (let i of this.child()) {
             fn.call(thisVar, i)
         }
