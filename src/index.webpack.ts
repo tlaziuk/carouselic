@@ -1,4 +1,7 @@
 import { Carousel } from './carousel'
-import './resize.mod'
+
 import './globalize.mod'
+import './jquery.mod'
+import './resize.mod'
+
 export { Carousel }
