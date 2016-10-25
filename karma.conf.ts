@@ -7,6 +7,10 @@ module.exports = (config: karma.Config) => {
         ],
         files: [
             {
+                pattern: `node_modules/jquery/dist/jquery.js`,
+                included: true,
+            },
+            {
                 pattern: `node_modules/es6-promise/dist/es6-promise.auto.js`,
                 included: true,
             },

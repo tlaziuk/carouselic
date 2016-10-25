@@ -3,6 +3,7 @@ import { Carousel, CarouselOpt } from './carousel'
 declare global {
     interface Window {
         jQuery: {
+            (...arg: any[]): any
             fn: any
         }
     }
@@ -10,7 +11,7 @@ declare global {
 
 if (window.jQuery && !window.jQuery.fn.Carouselic) {
     const map = new WeakMap<HTMLElement, Carousel>()
-    window.jQuery.fn.Carouselic(function(this: any, options: CarouselOpt = {}) {
+    window.jQuery.fn.Carouselic(function(this: any, options: CarouselOpt = {}): Carousel[] {
         let res: Carousel[] = []
         for (let element of this.get()) {
             if (!map.has(element)) {
