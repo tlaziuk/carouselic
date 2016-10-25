@@ -5,7 +5,7 @@
     "experimentalDecorators": true,
     "inlineSourceMap": true,
     "inlineSources": false,
-    "listFiles": true,
+    "listFiles": false,
     "module": "commonjs",
     "noEmitOnError": true,
     "noImplicitAny": true,

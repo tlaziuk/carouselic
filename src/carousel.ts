@@ -32,12 +32,19 @@ export interface CarouselVisibleInterface {
     last: CarouselVisibleTuple
 }
 
+export const DEFAULT: CarouselOpt = {
+    childSelector: `:scope > *`,
+    orientation: Orientation.Automatic,
+    currentClass: `current`,
+    index: 0,
+}
+
 export class Carousel {
     protected emit = emit
     protected orientation: Orientation
     protected currentClass: string
     protected childSelector: string
-    constructor(protected element: HTMLElement, {childSelector = `:scope > *`, orientation = Orientation.Automatic, currentClass = `current`, index = 0, }: CarouselOpt = {}) {
+    constructor(protected element: HTMLElement, {childSelector = DEFAULT.childSelector, orientation = DEFAULT.orientation, currentClass = DEFAULT.current, index = DEFAULT.index, }: CarouselOpt = {}) {
         this.childSelector = childSelector
         this.orientation = orientation
         this.currentClass = currentClass
