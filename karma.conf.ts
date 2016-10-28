@@ -6,10 +6,9 @@ module.exports = (config: karma.Config) => {
             `karma-typescript`,
         ],
         files: [
-            {
-                pattern: `node_modules/es6-promise/dist/es6-promise.auto.js`,
-                included: true,
-            },
+            `./node_modules/es5-shim/es5-shim.min.js`,
+            `./node_modules/es6-shim/es6-shim.min.js`,
+            `./node_modules/es7-shim/es7-shim.min.js`,
             {
                 pattern: `src/**/*.ts`,
                 included: true,

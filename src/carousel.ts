@@ -6,6 +6,7 @@ import { on, emit, CarouselEvent } from './event'
 import { promiseFn } from './async'
 import { size, SizeInterface, SizeCooridinatesInterface } from './size'
 import { translate as transformTranslate, TranslateInterface } from './transform'
+import { carousel as CarouselDefault, CarouselOpt, CarouselOptAll } from './default'
 
 export interface MoveInterface {
     next: boolean
@@ -18,13 +19,6 @@ export interface StepInterface {
     step?: number
 }
 
-export interface CarouselOpt {
-    childSelector?: string
-    currentClass?: string
-    orientation?: Orientation
-    index?: number
-}
-
 export type CarouselVisibleTuple = [HTMLElement, number]
 
 export interface CarouselVisibleInterface {
@@ -32,27 +26,16 @@ export interface CarouselVisibleInterface {
     last: CarouselVisibleTuple
 }
 
-export const DEFAULT: CarouselOpt = {
-    childSelector: `:scope > *`,
-    orientation: Orientation.Automatic,
-    currentClass: `current`,
-    index: 0,
-}
-
 export class Carousel {
     protected emit = emit
-    protected orientation: Orientation
-    protected currentClass: string
-    protected childSelector: string
-    constructor(protected element: HTMLElement, {childSelector = DEFAULT.childSelector, orientation = DEFAULT.orientation, currentClass = DEFAULT.current, index = DEFAULT.index, }: CarouselOpt = {}) {
-        this.childSelector = childSelector
-        this.orientation = orientation
-        this.currentClass = currentClass
-        this.index = this.indexParse(index)
-        this.emit(CarouselEvent.init)
+    public opt: CarouselOptAll = CarouselDefault
+    constructor(protected element: HTMLElement, opt: CarouselOpt = {}) {
+        Object.assign(this.opt, opt)
+        this.index = this.indexParse(this.opt.index)
+        this.emit(CarouselEvent.init, opt)
     }
     public child(): HTMLElement[] {
-        let childs = this.element.querySelectorAll(this.childSelector) as NodeListOf<HTMLElement>
+        let childs = this.element.querySelectorAll(this.opt.childSelector) as NodeListOf<HTMLElement>
         let result = [] as HTMLElement[]
         for (let i = 0; i < childs.length; i++) {
             result.push(childs.item(i))
@@ -69,10 +52,10 @@ export class Carousel {
             const index = this.index
             const thisSize = size(this.element)
             each<Carousel, void, HTMLElement>(child, function(this: Carousel, el: HTMLElement) {
-                el.classList.remove(this.currentClass)
+                el.classList.remove(this.opt.currentClass)
             }, this)
-            this._current.classList.add(this.currentClass)
-            let orientation: Orientation = this.parseOrientation(this.orientation, thisSize)
+            this._current.classList.add(this.opt.currentClass)
+            let orientation: Orientation = this.parseOrientation(this.opt.orientation, thisSize)
             let yParameter: 'x' | 'y'
             let leftParameter: 'left' | 'top'
             let rightParameter: 'right' | 'bottom'
@@ -128,7 +111,7 @@ export class Carousel {
             return el
         }, this)
     }
-    protected parseOrientation(orientation: Orientation = this.orientation, thisSize: SizeInterface = size(this.element)): Orientation {
+    protected parseOrientation(orientation: Orientation = this.opt.orientation, thisSize: SizeInterface = size(this.element)): Orientation {
         if (orientation === Orientation.Automatic) {
             if (thisSize.width >= thisSize.height) {
                 orientation = Orientation.Horiziontal
@@ -138,7 +121,7 @@ export class Carousel {
         }
         return orientation
     }
-    public inViewport(element: HTMLElement, orientation: Orientation = this.orientation, thisSize: SizeInterface = size(this.element)): boolean {
+    public inViewport(element: HTMLElement, orientation: Orientation = this.opt.orientation, thisSize: SizeInterface = size(this.element)): boolean {
         const elementSize = size(element)
         orientation = this.parseOrientation(orientation, thisSize)
         if (orientation === Orientation.Horiziontal) {
@@ -166,7 +149,7 @@ export class Carousel {
     public get length(): number {
         return this.child().length
     }
-    protected getVisible(orientation: Orientation = this.orientation, thisSize: SizeInterface = size(this.element)): CarouselVisibleInterface {
+    protected getVisible(orientation: Orientation = this.opt.orientation, thisSize: SizeInterface = size(this.element)): CarouselVisibleInterface {
         const child = this.child()
         orientation = this.parseOrientation(orientation, thisSize)
         let result: CarouselVisibleInterface = {
@@ -187,8 +170,8 @@ export class Carousel {
         this.emit(CarouselEvent.visible, result)
         return result
     }
-    public move({step = 0, orientation = this.orientation, mode = Mode.Single, }: StepInterface = {}): MoveInterface {
-        this.orientation = orientation
+    public move({step = 0, orientation = this.opt.orientation, mode = Mode.Single, }: StepInterface = {}): MoveInterface {
+        this.opt.orientation = orientation
         let result: MoveInterface = {
             next: false,
             previous: false,
