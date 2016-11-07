@@ -8,6 +8,7 @@ export const enum CarouselEvent {
     init = current << 1,
     move = init << 1,
     visible = move << 1,
+    wheel = visible << 1,
 }
 
 export type CarouselEventFunction = (this: Carousel, ...args: any[]) => void
@@ -19,21 +20,21 @@ interface CarouselEventInterface {
 let EVT: CarouselEventInterface = {}
 
 export function emit(this: Carousel, evt: CarouselEvent, ...args: any[]) {
-    return promiseFn<Carousel, void>(function(this: Carousel) {
+    return promiseFn<Carousel, any[]>(function(this: Carousel) {
+        let res: any[] = []
         for (let t in EVT) {
             let evtVal = parseInt(t)
             if (evtVal | evt) {
-                eachFn(EVT[t], this, ...args)
+                res.push(...eachFn<Carousel, any>(EVT[t], this, ...args))
             }
         }
+        return res
     }, this)
 }
 
-export function on(evt: number, fn: CarouselEventFunction) {
-    return promiseFn<void, void>(function(this: void) {
-        if (!EVT[evt]) {
-            EVT[evt] = []
-        }
-        EVT[evt].push(fn)
-    })
+export function on(evt: number, fn: CarouselEventFunction): void {
+    if (!EVT[evt]) {
+        EVT[evt] = []
+    }
+    EVT[evt].push(fn)
 }

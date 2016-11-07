@@ -5,7 +5,9 @@ export function each<T extends any, R extends any, A extends any>(collection: A[
     return result
 }
 
-export function eachFn<T extends any>(collection: Function[], thisVar?: T, ...args: any[]): void {
+export function eachFn<T extends any, R extends any>(collection: Function[], thisVar?: T, ...args: any[]): R[] {
+    let ret: R[] = []
     for (let fn of collection)
-        fn.apply(thisVar, args)
+        ret.push(fn.apply(thisVar, args))
+    return ret
 }

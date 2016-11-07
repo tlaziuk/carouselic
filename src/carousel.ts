@@ -33,11 +33,11 @@ export interface CarouselVisibleInterface {
 }
 
 export class Carousel {
-    protected emit = emit
+    public emit = emit
     protected orientation: Orientation
     protected currentClass: string
     protected childSelector: string
-    constructor(protected element: HTMLElement, {childSelector = `:scope > *`, orientation = Orientation.Automatic, currentClass = `current`, index = 0, }: CarouselOpt = {}) {
+    constructor(public readonly element: HTMLElement, {childSelector = `:scope > *`, orientation = Orientation.Automatic, currentClass = `current`, index = 0, }: CarouselOpt = {}) {
         this.childSelector = childSelector
         this.orientation = orientation
         this.currentClass = currentClass
