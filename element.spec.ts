@@ -1,4 +1,4 @@
-import { element } from '../src/element'
+import { element } from './element'
 
 const selector = `html`
 const badSelector = Number.NaN

@@ -25,11 +25,12 @@
     ]
   },
   "include": [
-    "**/*.conf.ts",
-    "**/*.config.ts",
-    "**/*.mod.ts",
-    "**/*.web.ts",
-    "**/*.webpack.ts",
-    "src/index.ts"
-  ]
+    "**/*.ts"
+  ],
+    "exclude": [
+        "node_modules",
+        "**/*.spec.ts",
+        "**/*.webpack.ts"
+
+    ]
 }

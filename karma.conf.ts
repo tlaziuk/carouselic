@@ -11,11 +11,11 @@ module.exports = (config: karma.Config) => {
                 included: true,
             },
             {
-                pattern: `src/**/*.ts`,
+                pattern: `mod/!(webpack|conf).ts`,
                 included: true,
             },
             {
-                pattern: `test/**/*.ts`,
+                pattern: `!(*.webpack|*.conf).ts`,
                 included: true,
             },
         ],
@@ -46,7 +46,7 @@ module.exports = (config: karma.Config) => {
             },
             remapOptions:
             {
-                exclude: /\.(spec|test|d)\.ts/i,
+                exclude: /\.(spec|test|d|conf|webpack)\.ts/i,
             },
         },
     } as karma.ConfigOptions)

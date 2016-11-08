@@ -1,5 +1,5 @@
-import { Carousel } from './carousel'
-import { on, CarouselEvent } from './event'
+import { Carousel } from '../carousel'
+import { on, CarouselEvent } from '../event'
 
 if (window) {
     on(CarouselEvent.init, function(this: Carousel) {

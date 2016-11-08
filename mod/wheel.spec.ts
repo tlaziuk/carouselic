@@ -1,7 +1,7 @@
-import { Carousel, Mode, Orientation } from '../src/index'
-import '../src/wheel.mod'
-import { tree } from './carousel.spec'
-import { on, CarouselEvent } from '../src/event'
+import { Carousel } from '../carousel'
+import '../mod/wheel'
+import { tree } from '../carousel.spec'
+import { on, CarouselEvent } from '../event'
 
 describe(`wheel`, () => {
     it(`expect Carousel to have wheel method`, (done: Function) => {

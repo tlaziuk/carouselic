@@ -1,6 +1,6 @@
-import { Carousel } from './carousel'
-import { eventFn } from './async'
-import { CarouselEvent } from './event'
+import { Carousel } from '../carousel'
+import { eventFn } from '../async'
+import { CarouselEvent } from '../event'
 
 export function wheel(this: Carousel) {
     if (!this._wheel) {
@@ -18,7 +18,7 @@ export function wheel(this: Carousel) {
 Carousel.prototype.wheel = wheel
 Carousel.prototype._wheel = false
 
-declare module './carousel' {
+declare module '../carousel' {
     interface Carousel {
         wheel: typeof wheel
         _wheel: boolean

@@ -1,4 +1,4 @@
-import { promiseFn } from '../src/async'
+import { promiseFn } from './async'
 
 describe(`async`, () => {
     it(`expect ${promiseFn} to exists`, (done: Function) => {

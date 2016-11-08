@@ -2,18 +2,17 @@ import * as webpack from 'webpack'
 
 module.exports = {
     entry: {
-        'carouselic': `./src/index`,
-        'carouselic.min': `./src/index`,
+        'carouselic': `./index`,
+        'carouselic.min': `./index`,
     },
     output: {
-        filename: `./dist/[name].js`,
+        filename: `./[name].js`,
     },
     devtool: `source-map`,
     resolve: {
         extensions: [
             ``,
             `.webpack.ts`,
-            `.web.ts`,
             `.ts`,
         ],
     },

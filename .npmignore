@@ -22,5 +22,10 @@ node_modules
 #system
 tags
 #project
-**.ts
-!**.d.ts
+*.spec.*
+*.conf.*
+*.webpack.*
+*.json
+*.yml
+.editorconfig
+*.html
