@@ -2,8 +2,7 @@ import { Mode } from './mode'
 import { Orientation } from './orientation'
 import { each } from './each'
 import { element as find } from './element'
-import { on, emit, CarouselEvent } from './event'
-import { promiseFn } from './async'
+import { CarouselEvent, CarouselEventFunction, CarouselEventInterface, on } from './event'
 import { size, SizeInterface, SizeCooridinatesInterface } from './size'
 import { translate as transformTranslate, TranslateInterface } from './transform'
 
@@ -33,7 +32,6 @@ export interface CarouselVisibleInterface {
 }
 
 export class Carousel {
-    public emit = emit
     protected orientation: Orientation
     protected currentClass: string
     protected childSelector: string
@@ -44,6 +42,28 @@ export class Carousel {
         this.index = this.indexParse(index)
         this.emit(CarouselEvent.init)
     }
+    protected evt: CarouselEventInterface = {}
+    protected static evt: CarouselEventInterface = {}
+    public async emit(evt: number, ...args: any[]) {
+        let tmp: CarouselEventFunction[] = []
+        let res: any[] = []
+        for (let t in this.evt) {
+            if (parseInt(t) | evt) {
+                tmp.push(...this.evt[t])
+            }
+        }
+        for (let t in Carousel.evt) {
+            if (parseInt(t) | evt) {
+                tmp.push(...Carousel.evt[t])
+            }
+        }
+        for (let fn of tmp) {
+            res.push(fn.apply(this, args))
+        }
+        return await Promise.all(res)
+    }
+    public static on = on.bind(Carousel) as (evt: number, fn: CarouselEventFunction) => typeof Carousel
+    public on = on.bind(this) as (evt: number, fn: CarouselEventFunction) => this
     public child(): HTMLElement[] {
         let childs = this.element.querySelectorAll(this.childSelector) as NodeListOf<HTMLElement>
         let result = [] as HTMLElement[]
@@ -54,72 +74,70 @@ export class Carousel {
         return result
     }
     protected _current: HTMLElement
-    public current(el: HTMLElement = this._current): Promise<HTMLElement> {
+    public async current(el: HTMLElement = this._current) {
         this._current = el
-        return promiseFn<Carousel, HTMLElement>(function(this: Carousel) {
-            const child = this.child()
-            const currentSize = size(this._current)
-            const index = this.index
-            const thisSize = size(this.element)
-            each<Carousel, void, HTMLElement>(child, function(this: Carousel, el: HTMLElement) {
-                el.classList.remove(this.currentClass)
-            }, this)
-            this._current.classList.add(this.currentClass)
-            let orientation: Orientation = this.parseOrientation(this.orientation, thisSize)
-            let yParameter: 'x' | 'y'
-            let leftParameter: 'left' | 'top'
-            let rightParameter: 'right' | 'bottom'
-            let widthParameter: 'width' | 'height'
-            let fn: (before: number, after: number) => TranslateInterface
-            if (orientation === Orientation.Horiziontal) {
-                fn = (before: number, after: number) => {
-                    return { x: before, y: after, }
-                }
-                yParameter = 'y'
-                leftParameter = 'left'
-                rightParameter = 'right'
-                widthParameter = 'width'
-            } else {
-                fn = (before: number, after: number) => {
-                    return { x: after, y: before, }
-                }
-                yParameter = 'x'
-                leftParameter = 'top'
-                rightParameter = 'bottom'
-                widthParameter = 'height'
-            }
-            let left: number
-            let right: number
-            if (!this.inViewport(this._current, orientation, thisSize)) {
-                if (currentSize[rightParameter] >= thisSize[rightParameter]) {
-                    left = thisSize[widthParameter] - currentSize[widthParameter]
-                } else {
-                    left = 0
-                }
-            } else {
-                if (index === 0) {
-                    left = 0
-                } else {
-                    left = currentSize[leftParameter] - thisSize[leftParameter]
-                }
-            }
-            right = left + currentSize[widthParameter]
-            transformTranslate(this._current, fn(left, thisSize.center[yParameter] - currentSize.center[yParameter]))
-            for (let i = index - 1; i >= 0; i--) {
-                let childElement = child[i]
-                let childSize = size(childElement)
-                left -= childSize[widthParameter]
-                transformTranslate(childElement, fn(left, thisSize.center[yParameter] - childSize.center[yParameter]))
-            }
-            for (let i = index + 1; i < child.length; i++) {
-                let childElement = child[i]
-                let childSize = size(childElement)
-                transformTranslate(childElement, fn(right, thisSize.center[yParameter] - currentSize.center[yParameter]))
-                right += childSize[widthParameter]
-            }
-            this.emit(CarouselEvent.current, el)
-            return el
+        const child = this.child()
+        const currentSize = size(this._current)
+        const index = this.index
+        const thisSize = size(this.element)
+        each<Carousel, void, HTMLElement>(child, function(this: Carousel, el: HTMLElement) {
+            el.classList.remove(this.currentClass)
         }, this)
+        this._current.classList.add(this.currentClass)
+        let orientation: Orientation = this.parseOrientation(this.orientation, thisSize)
+        let yParameter: 'x' | 'y'
+        let leftParameter: 'left' | 'top'
+        let rightParameter: 'right' | 'bottom'
+        let widthParameter: 'width' | 'height'
+        let fn: (before: number, after: number) => TranslateInterface
+        if (orientation === Orientation.Horiziontal) {
+            fn = (before: number, after: number) => {
+                return { x: before, y: after, }
+            }
+            yParameter = 'y'
+            leftParameter = 'left'
+            rightParameter = 'right'
+            widthParameter = 'width'
+        } else {
+            fn = (before: number, after: number) => {
+                return { x: after, y: before, }
+            }
+            yParameter = 'x'
+            leftParameter = 'top'
+            rightParameter = 'bottom'
+            widthParameter = 'height'
+        }
+        let left: number
+        let right: number
+        if (!this.inViewport(this._current, orientation, thisSize)) {
+            if (currentSize[rightParameter] >= thisSize[rightParameter]) {
+                left = thisSize[widthParameter] - currentSize[widthParameter]
+            } else {
+                left = 0
+            }
+        } else {
+            if (index === 0) {
+                left = 0
+            } else {
+                left = currentSize[leftParameter] - thisSize[leftParameter]
+            }
+        }
+        right = left + currentSize[widthParameter]
+        transformTranslate(this._current, fn(left, thisSize.center[yParameter] - currentSize.center[yParameter]))
+        for (let i = index - 1; i >= 0; i--) {
+            let childElement = child[i]
+            let childSize = size(childElement)
+            left -= childSize[widthParameter]
+            transformTranslate(childElement, fn(left, thisSize.center[yParameter] - childSize.center[yParameter]))
+        }
+        for (let i = index + 1; i < child.length; i++) {
+            let childElement = child[i]
+            let childSize = size(childElement)
+            transformTranslate(childElement, fn(right, thisSize.center[yParameter] - currentSize.center[yParameter]))
+            right += childSize[widthParameter]
+        }
+        this.emit(CarouselEvent.current, el)
+        return el
     }
     protected parseOrientation(orientation: Orientation = this.orientation, thisSize: SizeInterface = size(this.element)): Orientation {
         if (orientation === Orientation.Automatic) {

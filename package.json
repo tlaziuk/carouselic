@@ -5,9 +5,9 @@
   "main": "index.js",
   "typings": "index.d.ts",
   "scripts": {
-    "build": "npm run tsc && npm run bundle && npm run bundle:compress",
+    "build": "npm run clean && npm run tsc && npm run bundle && npm run bundle:compress",
     "bundle": "webpack --config webpack.conf.js",
-    "bundle:compress": "for c in carouselic*js; do gzip -c -9 -v \"$c\" > \"$c.gz\"; done",
+    "bundle:compress": "for c in ./dist/carouselic*js; do gzip -c -9 -v \"$c\" > \"$c.gz\"; done",
     "bundle:w": "webpack --config webpack.conf.js --watch",
     "clean": "git clean -Xf",
     "coveralls": "for lcov in coverage/*/lcovonly; do cat \"$lcov\" | coveralls; done",

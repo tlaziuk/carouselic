@@ -1,42 +1,44 @@
-import { promiseFn } from './async'
+import { eventFn } from './async'
 
-describe(`async`, () => {
-    it(`expect ${promiseFn} to exists`, (done: Function) => {
-        expect(promiseFn).not.toBeUndefined()
+describe(`eventFn`, () => {
+    it(`expect ${eventFn} to exists`, (done: Function) => {
+        expect(eventFn).not.toBeUndefined()
         done()
     })
-    it(`expect ${promiseFn} to return ${Promise}`, (done: Function) => {
-        expect(promiseFn(() => { }) instanceof Promise).toBeTruthy()
+    it(`expect ${eventFn} to return ${Function}`, (done: Function) => {
+        expect(eventFn(() => { }) instanceof Function).toBeTruthy()
         done()
     })
-    it(`expect ${promiseFn} to fail`, (done: Function) => {
-        promiseFn(() => { throw `error` }).catch(() => { done() })
-    })
-    it(`expect ${promiseFn} to succeed`, (done: Function) => {
-        promiseFn(() => { }).then(() => { done() })
-    })
-    it(`expect ${promiseFn} to have working scoping`, (done: Function) => {
+    it(`expect ${eventFn} to have working scoping`, (done: Function) => {
         class TestMock {
             a = 1
         }
-        promiseFn(function(this: testMock) {
+        eventFn(function(this: testMock) {
             expect(this).not.toBeUndefined()
             expect(this.a).toEqual(1)
-        }, new TestMock).then(() => { done() }, (err) => { done.fail(err) })
+            done()
+        }).apply(new TestMock)
     })
-    it(`expect ${promiseFn} to have working arguments`, (done: Function) => {
+    it(`expect ${eventFn} to have working arguments`, (done: Function) => {
         class TestMock {
             static A = 2
             static B = TestMock.A ** TestMock.A
             a = TestMock.A
             b = TestMock.B
         }
-        promiseFn(function(this: testMock, val1: any, val2: any) {
+        eventFn(function(this: TestMock, evt: any, val1: any, val2: any) {
             expect(this).not.toBeUndefined()
             expect(this.a).toEqual(val1)
             expect(this.b).toEqual(val2)
-        },
-            new TestMock,
-            TestMock.A, TestMock.B).then(() => { done() }, (err) => { done.fail(err) })
+            done()
+        }, TestMock.A, TestMock.B).call(new TestMock)
+    })
+    it(`expect ${eventFn} to have working event`, (done: Function) => {
+        let evtTest = `test`
+        eventFn(function(this: any, evt: any) {
+            expect(evt).not.toBeUndefined()
+            expect(evt).toEqual(evtTest)
+            done()
+        }).call(undefined, evtTest)
     })
 })

@@ -34,8 +34,7 @@ module.exports = (config: karma.Config) => {
         ],
         singleRun: true,
         karmaTypescriptConfig: {
-            reports:
-            {
+            reports: {
                 'clover': `coverage`,
                 'cobertura': `coverage`,
                 'html': `coverage`,
@@ -44,8 +43,7 @@ module.exports = (config: karma.Config) => {
                 'lcovonly': `coverage`,
                 'teamcity': `coverage`,
             },
-            remapOptions:
-            {
+            remapOptions: {
                 exclude: /\.(spec|test|d|conf|webpack)\.ts/i,
             },
         },

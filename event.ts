@@ -1,6 +1,4 @@
 import { Carousel } from './carousel'
-import { promiseFn } from './async'
-import { eachFn } from './each'
 
 export const enum CarouselEvent {
     child = 1,
@@ -11,30 +9,18 @@ export const enum CarouselEvent {
     wheel = visible << 1,
 }
 
+export { CarouselEvent as Event }
+
 export type CarouselEventFunction = (this: Carousel, ...args: any[]) => void
 
-interface CarouselEventInterface {
+export interface CarouselEventInterface {
     [key: number]: CarouselEventFunction[]
 }
 
-let EVT: CarouselEventInterface = {}
-
-export function emit(this: Carousel, evt: CarouselEvent, ...args: any[]) {
-    return promiseFn<Carousel, any[]>(function(this: Carousel) {
-        let res: any[] = []
-        for (let t in EVT) {
-            let evtVal = parseInt(t)
-            if (evtVal | evt) {
-                res.push(...eachFn<Carousel, any>(EVT[t], this, ...args))
-            }
-        }
-        return res
-    }, this)
-}
-
-export function on(evt: number, fn: CarouselEventFunction): void {
-    if (!EVT[evt]) {
-        EVT[evt] = []
+export function on(this: { evt: CarouselEventInterface }, evt: number, fn: CarouselEventFunction) {
+    if (!this.evt[evt]) {
+        this.evt[evt] = []
     }
-    EVT[evt].push(fn)
+    this.evt[evt].push(fn)
+    return this
 }

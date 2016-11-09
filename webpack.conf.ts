@@ -6,7 +6,7 @@ module.exports = {
         'carouselic.min': `./index`,
     },
     output: {
-        filename: `./[name].js`,
+        filename: `./dist/[name].js`,
     },
     devtool: `source-map`,
     resolve: {

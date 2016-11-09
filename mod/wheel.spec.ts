@@ -1,7 +1,7 @@
 import { Carousel } from '../carousel'
 import '../mod/wheel'
 import { tree } from '../carousel.spec'
-import { on, CarouselEvent } from '../event'
+import { CarouselEvent } from '../event'
 
 describe(`wheel`, () => {
     it(`expect Carousel to have wheel method`, (done: Function) => {
@@ -19,5 +19,13 @@ describe(`wheel`, () => {
         expect(carousel._wheel).toEqual(true)
         done()
     })
-    it(`expect Carousel method wheel to change carousel state`)
-})
+    it(`expect Carousel wheel event to trigger properly`, (done: Function) => {
+        let mockTree = tree(document.createElement('div'))
+        document.body.appendChild(mockTree.parent)
+        let carousel = new Carousel(mockTree.container)
+        carousel.wheel()
+        carousel.on(CarouselEvent.wheel, () => {
+            done()
+        })
+        mockTree.container.dispatchEvent(new CustomEvent(`wheel`))
+    })
