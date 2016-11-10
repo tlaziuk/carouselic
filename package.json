@@ -33,7 +33,9 @@
     "url": "https://github.com/tlaziuk/carouselic/issues"
   },
   "homepage": "https://github.com/tlaziuk/carouselic",
-  "dependencies": {},
+  "dependencies": {
+    "tslib": "^1.0.0"
+  },
   "devDependencies": {
     "@types/jasmine": "^2.5.2",
     "@types/karma": "^0.13.33",
