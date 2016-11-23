@@ -1,15 +1,14 @@
 import { Carousel } from '../carousel'
-import { eventFn } from '../async'
 import { CarouselEvent } from '../event'
 
 export function wheel(this: Carousel) {
     if (!this._wheel) {
-        this.element.addEventListener(`wheel`, eventFn<typeof Carousel.prototype.element, WheelEvent>(function(this: typeof Carousel.prototype.element, evt: WheelEvent, carousel: Carousel) {
-            carousel.move({
+        this.element.addEventListener(`wheel`, async (evt: WheelEvent) => {
+            this.move({
                 step: evt.deltaX + evt.deltaY + evt.deltaZ,
             })
-            carousel.emit(CarouselEvent.wheel, evt)
-        }, this))
+            this.emit(CarouselEvent.wheel, evt)
+        })
         this._wheel = true
     }
     return this

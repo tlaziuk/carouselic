@@ -34,7 +34,7 @@
   },
   "homepage": "https://github.com/tlaziuk/carouselic",
   "dependencies": {
-    "tslib": "^1.0.0"
+    "tslib": "latest"
   },
   "devDependencies": {
     "@types/jasmine": "^2.5.2",
